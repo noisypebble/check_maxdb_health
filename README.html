@@ -1,0 +1,492 @@
+<html>
+  <head>
+    <title>check_maxdb_health</title>
+  </head>
+  <body>
+<h1><a href="http://labs.consol.de/lang/en/nagios/check_maxdb_health" rel="bookmark" title="Permanent Link to check_maxdb_health">check_maxdb_health</a></h1>
+<p>Posted on July 6th, 2009 by admin </p>
+		
+
+<p><!----></p>
+
+<h1>Description</h1>
+
+<p>check_maxdb_health is a plugin to check various parameters of a MaxDB database.</p>
+
+<h1>Command line parameters</h1>
+
+<ul>
+  <li>&#8211;hostname &lt;hostname> 
+    <p>The database server which should be monitored. In case of &#8220;localhost&#8221; this parameter can be omitted. </p>
+  </li>
+
+  <li>&#8211;username &lt;username> 
+    <p>The database user. </p>
+  </li>
+
+  <li>&#8211;password &lt;password> 
+    <p>Password of the database user. </p>
+  </li>
+
+  <li>&#8211;mode &lt;modus> 
+    <p>With the mode-parameter you tell the plugin what it should do. See the list of possible values further down. </p>
+  </li>
+
+  <li>&#8211;name &lt;objektname> 
+    <p>Here the check can be limited to a single object. (Momentarily this parameter is only used for mode=sql) </p>
+  </li>
+
+  <li>&#8211;name2 &lt;string> 
+    <p>If you use &#8211;mode=sql, then the SQL-Statement appears in the output and performance values. With the parameter name2 you&#8217;re able to specify a string for this.. </p>
+  </li>
+
+  <li>&#8211;warning &lt;range> 
+    <p>Determined values outside of this range trigger a WARNING. </p>
+  </li>
+
+  <li>&#8211;critical &lt;range> 
+    <p>Determined values outside of this range trigger a CRITICAL. </p>
+  </li>
+
+  <li>&#8211;environment &lt;variable>=&lt;wert> 
+    <p>With this you can pass environment variables to the script. Multiple declarations are possible. </p>
+  </li>
+
+  <li>&#8211;method &lt;connectmethode> 
+    <p>With this parameter you tell the plugin how it should connect to the database. (dbi for using DBD::maxdb (default), maxdb for maxdb-Tool). </p>
+  </li>
+
+  <li>&#8211;units &lt;%|KB|MB|GB> 
+    <p>The declaration from units serves the &#8220;beautification&#8221; of the output from mode=sql </p>
+  </li>
+</ul>
+
+<p>Use the option &#8211;mode with various keywords to tell the Plugin which values it should determine and check.</p>
+
+<table border="0" width="587"><tbody>
+    <tr>
+      <td width="166">Keyword</td>
+
+      <td width="329">Description</td>
+
+      <td width="90">Range</td>
+    </tr>
+
+    <tr>
+      <td width="166">connection-time</td>
+
+      <td width="329">Determines how long connection establishment and login take</td>
+
+      <td width="90">0..n Seconds (1, 5)</td>
+    </tr>
+
+    <tr>
+      <td width="166">uptime</td>
+
+      <td width="329">Time since start of the database server (recognizes DB-Crash+Restart)</td>
+
+      <td width="90">0..n Seconds (10:, 5: Minutes)</td>
+    </tr>
+
+    <tr>
+      <td width="166">threads-connected</td>
+
+      <td width="329">Number of open connections</td>
+
+      <td width="90">1..n (10, 20)</td>
+    </tr>
+
+    <tr>
+      <td width="166">threadcache-hitrate</td>
+
+      <td width="329">Hitrate in the Thread-Cache</td>
+
+      <td width="90">0%..100% (90:, 80:)</td>
+    </tr>
+
+    <tr>
+      <td width="166">q[uery]cache-hitrate</td>
+
+      <td width="329">Hitrate in the Query Cache</td>
+
+      <td width="90">0%..100% (90:, 80:)</td>
+    </tr>
+
+    <tr>
+      <td width="166">q[uery]cache-lowmem-prunes</td>
+
+      <td width="329">Displacement out of the Query Cache due to memory shortness</td>
+
+      <td width="90">n/sec (1, 10)</td>
+    </tr>
+
+    <tr>
+      <td width="166">[myisam-]keycache-hitrate</td>
+
+      <td width="329">Hitrate in the Myisam Key Cache</td>
+
+      <td width="90">0%..100% (99:, 95:)</td>
+    </tr>
+
+    <tr>
+      <td width="166">[innodb-]bufferpool-hitrate</td>
+
+      <td width="329">Hitrate in the InnoDB Buffer Pool</td>
+
+      <td width="90">0%..100% (99:, 95:)</td>
+    </tr>
+
+    <tr>
+      <td width="166">[innodb-]bufferpool-wait-free</td>
+
+      <td width="329">Rate of the InnoDB Buffer Pool Waits</td>
+
+      <td width="90">0..n/sec (1, 10)</td>
+    </tr>
+
+    <tr>
+      <td width="166">[innodb-]log-waits</td>
+
+      <td width="329">Rate of the InnoDB Log Waits</td>
+
+      <td width="90">0..n/sec (1, 10)</td>
+    </tr>
+
+    <tr>
+      <td width="166">tablecache-hitrate</td>
+
+      <td width="329">Hitrate in the Table-Cache</td>
+
+      <td width="90">0%..100% (99:, 95:)</td>
+    </tr>
+
+    <tr>
+      <td width="166">table-lock-contention</td>
+
+      <td width="329">Rate of failed table locks</td>
+
+      <td width="90">0%..100% (1, 2)</td>
+    </tr>
+
+    <tr>
+      <td width="166">index-usage</td>
+
+      <td width="329">Sum of the Index-Utilization (in contrast to Full Table Scans)</td>
+
+      <td width="90">0%..100% (90:, 80:)</td>
+    </tr>
+
+    <tr>
+      <td width="166">tmp-disk-tables</td>
+
+      <td width="329">Percent of the temporary tables that were created on the disk instead in memory</td>
+
+      <td width="90">0%..100% (25, 50)</td>
+    </tr>
+
+    <tr>
+      <td width="166">slow-queries</td>
+
+      <td width="329">Rate of queries that were detected as &#8220;slow&#8221;</td>
+
+      <td width="90">0..n/sec (0.1, 1)</td>
+    </tr>
+
+    <tr>
+      <td width="166">long-running-procs</td>
+
+      <td width="329">Sum of processes that are runnning longer than 1 minute</td>
+
+      <td width="90">0..n (10, 20)</td>
+    </tr>
+
+    <tr>
+      <td width="166">slave-lag</td>
+
+      <td width="329">Delay between Master and Slave</td>
+
+      <td width="90">0..n Seconds</td>
+    </tr>
+
+    <tr>
+      <td width="166">slave-io-running</td>
+
+      <td width="329">Checks if the IO-Thread of the Slave-DB is running</td>
+
+      <td width="90">&#160;</td>
+    </tr>
+
+    <tr>
+      <td width="166">slave-sql-running</td>
+
+      <td width="329">Checks if the SQL-Thread of the Slave-DB is running</td>
+
+      <td width="90">&#160;</td>
+    </tr>
+
+    <tr>
+      <td width="166">sql</td>
+
+      <td width="329">Result of any SQL-Statement that returns a number. The statement itself is passed over with the parameter &#8211;name. A Label for the performance data output can be passed over with the parameter &#8211;name2. The parameter &#8211;units can add units to the output (%, c, s, MB, GB,..). If the SQL-Statement includeds special characters or spaces, it can first be encoded with the mode encode.</td>
+
+      <td width="90">0..n</td>
+    </tr>
+
+    <tr>
+      <td width="166">open-files</td>
+
+      <td width="329">Number of open files (of upper limit)</td>
+
+      <td width="90">0%..100% (80, 95)</td>
+    </tr>
+
+    <tr>
+      <td width="166">encode</td>
+
+      <td width="329">Reads standard input (STDIN) and outputs an encoded string.</td>
+
+      <td width="90">&#160;</td>
+    </tr>
+
+    <tr>
+      <td width="166">cluster-ndb-running</td>
+
+      <td width="329">Checks if all cluster nodes are running.</td>
+
+      <td width="90">&#160;</td>
+    </tr>
+  </tbody></table>
+
+<p>Depending on the chosen mode two labels can appear in the performance data output.</p>
+
+<p>&lt;label>= and &lt;label_now>=</p>
+
+<p>The determinded values apply to the complete runtime of the database and to the time since the last run of check_mysl_health.</p>
+
+<p>Example: qcache_hitrate=71.63%;90:;80: qcache_hitrate_now=8.25%</p>
+
+<p>The Hitrate of the Query-Cache is calculated from Qcache_hits / ( Qcache_hits + Com_select ). This values are continuously increased. A serious change in access behaviour affects the hitrate only slowly. To be able to recognize temporarily fluctuations in the hitrate and, for example, assign it to an application update, the value qcache_hitrate_now is printed out additionally. This value is calculated through the difference (delta) between Qcache_hits and Com_select (actual value of the variables minus the value since the last run from check_maxdb_health).</p>
+
+<p>Here the command line parameter &#8211;lookback is used.</p>
+
+<ul>
+  <li>if this is missing, than qcache_hitrate_now is calculated from the difference (delta) between Qcache_hits and Com_select since the last run from check_maxdb_health. Important for the exitcode of the plugin is the long-term result qcache_hitrate (since database start).&#160; </li>
+
+  <li>if &#8211;lookback is specified with an argument n, than qcache_hitrate_now is calculated from the difference (delta) from Qcache_hits and Com_select since the last n seconnds. 
+    <p>For example: With &#8211;lookback 3600 you&#8217;ll get the average hitrate of the last hour, calculated back from the last plugin execution. The exitcode now also depends on this short-term test result. </p>
+  </li>
+</ul>
+
+<p>It&#8217;s recommended to use &#8211;lookback but specify at least half an hour (&#8211;lookback 1800) because the now-value underlies a heavy fluctuation which would lead to frequent alarms.</p>
+
+<p>Pleae note, that the thresholds must be specified according to the Nagios plug-in development Guidelines.</p>
+
+<p>&#8220;10&#8243; means &#8220;Alarm, if > 10&#8243; und</p>
+
+<p>&#8220;90:&#8221; means &#8220;Alarm, if &lt; 90&#8243;</p>
+
+<h1>Connect to the database</h1>
+
+<h2>Creating a database user</h2>
+
+<p>In order to be able to collect the needed information from the database a database user with specific privileges is required:</p>
+
+
+<div class="wp_syntax"><table><tr><td class="code"><pre class="sql" style="font-family:monospace;"><span style="color: #993333; font-weight: bold;">GRANT</span> usage <span style="color: #993333; font-weight: bold;">ON</span> <span style="color: #66cc66;">*.*</span> <span style="color: #993333; font-weight: bold;">TO</span> <span style="color: #ff0000;">'nagios'</span>@<span style="color: #ff0000;">'nagiosserver'</span> <span style="color: #993333; font-weight: bold;">IDENTIFIED</span> <span style="color: #993333; font-weight: bold;">BY</span> <span style="color: #ff0000;">'nagiospassword'</span></pre></td></tr></table></div>
+
+
+<h2>Connectionstring</h2>
+
+<p>To connect to the database you use the parameters &#8211;username and &#8211;password. The database server which should be used can be specified more precise with &#8211;hostname and &#8211;socket or &#8211;port.</p>
+
+<h3>Use of environment variables</h3>
+
+<p>It&#8217;s possible to omit &#8211;hostname, &#8211;username and &#8211;password as well as &#8211;socket and &#8211;port completely, if you provide the corresponding values in environment variables. Since Version 3.x it is possible to extend service definitions in Nagios through own attributes (custom object variables). These will appear during the exectution of the check command in the environment.</p>
+
+<p>The environment variables are:</p>
+
+<ul>
+  <li>NAGIOS__SERVICEMYSQL_HOST (_maxdb_host in the service definition) </li>
+
+  <li>NAGIOS__SERVICEMYSQL_USER (_maxdb_user in the service definition) </li>
+
+  <li>NAGIOS__SERVICEMYSQL_PASS (_maxdb_pass in the service definition) </li>
+
+  <li>NAGIOS__SERVICEMYSQL_PORT (_maxdb_port in the service definition) </li>
+
+  <li>NAGIOS__SERVICEMYSQL_SOCK (_maxdb_sock in the service definition) </li>
+</ul>
+
+<h1>Examples</h1>
+
+
+<div class="wp_syntax"><table><tr><td class="code"><pre class="bash" style="font-family:monospace;"><span style="color: #666666;">nagios$ </span>check_maxdb_health <span style="color: #660033;">--hostname</span> mydb3 <span style="color: #660033;">--username</span> nagios <span style="color: #660033;">--password</span> nagios 
+<span style="color: #660033;">--mode</span> connection-time
+OK - <span style="color: #000000;">0.03</span> seconds to connect <span style="color: #c20cb9; font-weight: bold;">as</span> nagios <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #007800;">connection_time</span>=0.0337s;<span style="color: #000000;">1</span>;<span style="color: #000000;">5</span>
+&nbsp;
+<span style="color: #666666;">nagios$ </span>check_oracle_health <span style="color: #660033;">--mode</span>=connection-time
+OK - <span style="color: #000000;">0.17</span> seconds to connect  <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #007800;">connection_time</span>=<span style="color: #000000;">0.1740</span>;<span style="color: #000000;">1</span>;<span style="color: #000000;">5</span>
+&nbsp;
+<span style="color: #666666;">nagios$ </span>check_maxdb_health <span style="color: #660033;">--mode</span> querycache-hitrate
+CRITICAL - query cache hitrate <span style="color: #000000;">70.97</span><span style="color: #000000; font-weight: bold;">%</span> <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #007800;">qcache_hitrate</span>=<span style="color: #000000;">70.97</span><span style="color: #000000; font-weight: bold;">%</span>;<span style="color: #000000;">90</span>:;<span style="color: #000000;">80</span>: <span style="color: #007800;">qcache_hitrate_now</span>=<span style="color: #000000;">72.25</span><span style="color: #000000; font-weight: bold;">%</span> <span style="color: #007800;">selects_per_sec</span>=<span style="color: #000000;">270.00</span>
+&nbsp;
+<span style="color: #666666;">nagios$ </span>check_maxdb_health <span style="color: #660033;">--mode</span> querycache-hitrate 
+<span style="color: #660033;">--warning</span> <span style="color: #000000;">80</span>: <span style="color: #660033;">--critical</span> <span style="color: #000000;">70</span>:
+WARNING - query cache hitrate <span style="color: #000000;">70.82</span><span style="color: #000000; font-weight: bold;">%</span> <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #007800;">qcache_hitrate</span>=<span style="color: #000000;">70.82</span><span style="color: #000000; font-weight: bold;">%</span>;<span style="color: #000000;">80</span>:;<span style="color: #000000;">70</span>: <span style="color: #007800;">qcache_hitrate_now</span>=<span style="color: #000000;">62.82</span><span style="color: #000000; font-weight: bold;">%</span> <span style="color: #007800;">selects_per_sec</span>=<span style="color: #000000;">420.17</span>
+&nbsp;
+<span style="color: #666666;">nagios$ </span>check_maxdb_health <span style="color: #660033;">--mode</span> sql 
+<span style="color: #660033;">--name</span> <span style="color: #ff0000;">'select 111 from dual'</span>
+CRITICAL - <span style="color: #000000; font-weight: bold;">select</span> <span style="color: #000000;">111</span> from dual: <span style="color: #000000;">111</span> <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #ff0000;">'select 111 from dual'</span>=<span style="color: #000000;">111</span>;<span style="color: #000000;">1</span>;<span style="color: #000000;">5</span>
+&nbsp;
+<span style="color: #666666;">nagios$ </span><span style="color: #7a0874; font-weight: bold;">echo</span> <span style="color: #ff0000;">'select 111 from dual'</span> <span style="color: #000000; font-weight: bold;">|</span> 
+check_maxdb_health <span style="color: #660033;">--mode</span> encode
+select<span style="color: #000000; font-weight: bold;">%</span>20111<span style="color: #000000; font-weight: bold;">%</span>20from<span style="color: #000000; font-weight: bold;">%</span>20dual
+&nbsp;
+<span style="color: #666666;">nagios$ </span>check_maxdb_health <span style="color: #660033;">--mode</span> sql 
+<span style="color: #660033;">--name</span> select<span style="color: #000000; font-weight: bold;">%</span>20111<span style="color: #000000; font-weight: bold;">%</span>20from<span style="color: #000000; font-weight: bold;">%</span>20dual
+CRITICAL - <span style="color: #000000; font-weight: bold;">select</span> <span style="color: #000000;">111</span> from dual: <span style="color: #000000;">111</span> <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #ff0000;">'select 111 from dual'</span>=<span style="color: #000000;">111</span>;<span style="color: #000000;">1</span>;<span style="color: #000000;">5</span>
+&nbsp;
+<span style="color: #666666;">nagios$ </span>check_maxdb_health <span style="color: #660033;">--mode</span> sql 
+<span style="color: #660033;">--name</span> select<span style="color: #000000; font-weight: bold;">%</span>20111<span style="color: #000000; font-weight: bold;">%</span>20from<span style="color: #000000; font-weight: bold;">%</span>20dual <span style="color: #660033;">--name2</span> myval
+CRITICAL - myval: <span style="color: #000000;">111</span> <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #ff0000;">'myval'</span>=<span style="color: #000000;">111</span>;<span style="color: #000000;">1</span>;<span style="color: #000000;">5</span>
+&nbsp;
+<span style="color: #666666;">nagios$ </span>check_maxdb_health <span style="color: #660033;">--mode</span> sql 
+<span style="color: #660033;">--name</span> select<span style="color: #000000; font-weight: bold;">%</span>20111<span style="color: #000000; font-weight: bold;">%</span>20from<span style="color: #000000; font-weight: bold;">%</span>20dual <span style="color: #660033;">--name2</span> myval <span style="color: #660033;">--units</span> GB
+CRITICAL - myval: 111GB <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #ff0000;">'myval'</span>=111GB;<span style="color: #000000;">1</span>;<span style="color: #000000;">5</span>
+&nbsp;
+<span style="color: #666666;">nagios$ </span>check_maxdb_health <span style="color: #660033;">--mode</span> sql 
+<span style="color: #660033;">--name</span> select<span style="color: #000000; font-weight: bold;">%</span>20111<span style="color: #000000; font-weight: bold;">%</span>20from<span style="color: #000000; font-weight: bold;">%</span>20dual <span style="color: #660033;">--name2</span> myval <span style="color: #660033;">--units</span> GB 
+<span style="color: #660033;">--warning</span> <span style="color: #000000;">100</span> <span style="color: #660033;">--critical</span> <span style="color: #000000;">110</span>
+CRITICAL - myval: 111GB <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #ff0000;">'myval'</span>=111GB;<span style="color: #000000;">100</span>;<span style="color: #000000;">110</span></pre></td></tr></table></div>
+
+
+<h1>Installation</h1>
+
+<p>The plugin requires the installation of a maxdb-client packages. The installation of the perl-modules DBI and DBD::maxdb is desirable, but not mandatory.</p>
+
+<p>After unpacking the archive ./configure is called. With ./configure &#8211;help some options can be printed which show some default values for compiling the plugin.</p>
+
+<ul>
+  <li>&#8211;prefix=BASEDIRECTORY 
+    <p>Specify a directory in which check_maxdb_health should be stored. (default: /usr/local/nagios)</p>
+  </li>
+
+  <li>&#8211;with-nagios-user=SOMEUSER 
+    <p>This User will be the owner of the check_maxdb_health file. (default: nagios)</p>
+  </li>
+
+  <li>&#8211;with-nagios-group=SOMEGROUP 
+    <p>The group of the check_maxdb_health plugin. (default: nagios)</p>
+  </li>
+
+  <li>&#8211;with-perl=PATHTOPERL 
+    <p>Specify the path to the perl interpreter you wish to use. (default: perl in PATH)</p>
+  </li>
+</ul>
+
+<h1>Download</h1>
+
+<p><a href="http://labs.consol.de/download/shinken-nagios-plugins/check_maxdb_health-2.1.8.2.tar.gz" target="_blank">check_maxdb_health-2.1.8.2.tar.gz</a></p>
+
+<p><a href="http://labs.consol.de/download/shinken-nagios-plugins/check_maxdb_health-2.1.8.2.shar.gz" target="_blank">check_maxdb_health-2.1.8.2.shar.gz</a></p>
+
+<p>Manche tar-Versionen haben Probleme wegen der langen Dateinamen. In diesem Fall entpacken sie bitte das shar-Paket mit</p>
+
+
+<div class="wp_syntax"><table><tr><td class="code"><pre class="bash" style="font-family:monospace;"><span style="color: #c20cb9; font-weight: bold;">cat</span> check_maxdb_health-xxx.shar.gz <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #c20cb9; font-weight: bold;">gzip</span> <span style="color: #660033;">-d</span> <span style="color: #000000; font-weight: bold;">|</span> <span style="color: #c20cb9; font-weight: bold;">sh</span></pre></td></tr></table></div>
+
+
+<h1>Changelog</h1>
+
+<ul>
+  <li>2.1.8.2 2012-08-08 
+    <br />- bugfix in querycache-hitrate (div by 0 after db restart). (Thanks Gianluca Varisco) </li>
+
+  <li>2.1.8.1 2012-01-21 
+    <br />- bugfix in timeout-alarm handling under windows 
+
+    <br />- fix warnings for newest perl versions </li>
+
+  <li>2.1.8 2011-09-29 
+    <br />- new parameters &#8211;mycnf and &#8211;mycnfgroup 
+
+    <br />- single ticks around the &#8211;name argument under Windows CMD will be removed automatically 
+
+    <br /></li>
+
+  <li>2011-08-23 2.1.7 
+    <br />innodb modes now detect problems with the innodb engine </li>
+
+  <li>2011-08-12 2.1.6 
+    <br />fix a bug with statefilesdir and capital letters 
+
+    <p>add &#8211;labelformat so that groundwork no longer complains (max label length is 19 characters)</p>
+  </li>
+
+  <li>2011-01-03 2.1.5.1 
+    <br />bugfix in mode sql (numerical vs. regexp output) </li>
+
+  <li>2010-12-20 2.1.5 
+    <br />fixed a division by zero bug in index-usage (Thanks Wiltmut Gerdes) 
+
+    <p>fixed a severe bug when loading dynamic extensions (Thanks Ralph Schneider)</p>
+
+    <p>added mode table-fragmentation</p>
+
+    <p>fixed a bug in table-lock-contention (thanks mayukmok00)</p>
+
+    <p>mode sql can now have a non-numerical output which is compared to a string/regexp</p>
+
+    <p>new parameter &#8211;dbthresholds</p>
+
+    <p>new mode report can be used to output only the bad news (short,long,html)</p>
+  </li>
+
+  <li>2010-10-02 2.1.4 
+    <br />added modes threads-created, threads-running, threads-cached 
+
+    <p>added connects-aborted, clients-aborted</p>
+  </li>
+
+  <li>2010-10-01 2.1.3 
+    <br />added mode open-files 
+
+    <p>fix a bug in the pnp template</p>
+
+    <p>add extra-opts</p>
+  </li>
+
+  <li>2010-06-10 2.1.2 Changed some statements for better 4.x compatibility. (Thanks Florian) </li>
+
+  <li>2010-03-30 2.1.1 More tracing (touch /tmp/check_maxdb_health.trace to watch), fixed a bug in master-slave modes, so it outputs a more meaningful error message (Thanks Will Oberman), fixed a typo (Thanks Larsen) </li>
+
+  <li>2009-10-02 2.1 New parameter &#8211;lookback </li>
+
+  <li>2009-09-20 2.0.5 Bugfix in master-slave modes. (Danke Thomas Mueller). Bugfix in bufferpool-wait-free. (Danke Matthias Flacke). Bugfix im PNP template. (Danke Matthias Flacke). Mode slave-lag bemerkt failed io threads. (Danke Greg) </li>
+
+  <li>2009-04-02 2.0.4 Bugfix bei mode cluster-ndb-running, Bugfix im Master/Slave-Code. (Danke Arkadiusz Miskiewicz) </li>
+
+  <li>2009-03-18 2.0.3 Bugfix wg. warning=0, Bugfix in long-running-procs (betr. MaxDB &lt; 5.1) (Danke Bodo Schulz) </li>
+
+  <li>2009-03-11 2.0.1 Störende Uninitialized-Meldungen beseitigt (Danke John Alberts &amp; Thomas Borger). Passwortloses login an localhost ist jetzt möglich. </li>
+
+  <li>2009-03-06 2.0 erste öffentliche Version </li>
+</ul>
+
+<h1>Copyright</h1>
+
+<p>Gerhard Laußer</p>
+
+<p>Check_maxdb_health is published under the GNU General Public License. GPL</p>
+
+<h1>Author</h1>
+
+<p>Gerhard Laußer (gerhard.lausser@consol.de) gladly answers questions to this plugin.</p>
+
+<h1>Translation</h1>
+
+<p>Thanks to <a href="http://www.nagios-portal.org/wbb/index.php?page=User&amp;userID=6045" target="_blank">Christian Lauf</a> there is finally an english translation of this page :-)</p>
+
+<p><!----></p>
+  </body>
+</head>
